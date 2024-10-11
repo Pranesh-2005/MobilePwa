@@ -4,6 +4,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from deep_translator import GoogleTranslator
 from langdetect import detect
 import torch
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -55,9 +56,14 @@ def analyze_sentiment():
         "predicted_sentiment": emotion
     })
 
+@app.route('/static/<path:path>')
+def send_static(path):
+    return send_from_directory('static', path)
+
 @app.route('/manifest.json')
 def serve_manifest():
     return send_from_directory('.', 'manifest.json')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='localhost', port=7070)
+    port = int(os.environ.get('PORT', 7070))  # Use the PORT environment variable provided by Render
+    app.run(debug=True, host='0.0.0.0', port=port)
