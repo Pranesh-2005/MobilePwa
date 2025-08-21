@@ -10,10 +10,13 @@ app = Flask(__name__)
 CORS(app)
 
 # Load the model and tokenizer
-MODEL_NAME = "cardiffnlp/twitter-roberta-base-sentiment"
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-model = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
+# ...existing code...
 
+MODEL_DIR = "model"
+tokenizer = AutoTokenizer.from_pretrained(MODEL_DIR)
+model = AutoModelForSequenceClassification.from_pretrained(MODEL_DIR)
+
+# ...existing code...
 # Emotion labels based on model output
 emotion_labels = {
     0: "Negative 😕",
