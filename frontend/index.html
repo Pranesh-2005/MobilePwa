@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentiment Analyzer</title>
+  <script type="module">
+    import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+
+    let client;
+
+    async function initClient() {
+      client = await Client.connect("PraneshJs/emotion-detection");
+      console.log("✅ Connected to Gradio Space");
+    }
+
+    async function analyzeText() {
+      const input = document.getElementById("inputText").value.trim();
+      const resultBox = document.getElementById("result");
+      const button = document.getElementById("analyzeButton");
+
+      if (!input) {
+        resultBox.textContent = "⚠️ Please enter some text";
+        resultBox.className = "result warning";
+        return;
+      }
+
+      button.disabled = true;
+      resultBox.textContent = "⏳ Analyzing...";
+      resultBox.className = "result loading";
+
+      try {
+        const result = await client.predict("/predict", { text: input });
+        const sentiment = result.data?.[0] ?? "No result";
+
+        resultBox.textContent = sentiment;
+        if (sentiment.toLowerCase().includes("positive")) {
+          resultBox.className = "result positive";
+        } else if (sentiment.toLowerCase().includes("negative")) {
+          resultBox.className = "result negative";
+        } else {
+          resultBox.className = "result neutral";
+        }
+      } catch (err) {
+        console.error("❌ Error:", err);
+        resultBox.textContent = "Error occurred";
+        resultBox.className = "result error";
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    window.onload = initClient;
+    window.analyzeText = analyzeText;
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom right, #eef2ff, #dbeafe);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #1e3a8a;
+    }
+    textarea {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #cbd5e1;
+      border-radius: 0.75rem;
+      resize: none;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(to right, #2563eb, #7c3aed);
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      transform: scale(1.05);
+    }
+    .result {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    .positive {
+      color: #166534;
+      background: #dcfce7;
+      border: 2px solid #86efac;
+    }
+    .negative {
+      color: #991b1b;
+      background: #fee2e2;
+      border: 2px solid #fca5a5;
+    }
+    .neutral {
+      color: #1e40af;
+      background: #dbeafe;
+      border: 2px solid #93c5fd;
+    }
+    .error {
+      color: #b91c1c;
+      background: #fee2e2;
+      border: 2px solid #fca5a5;
+    }
+    .loading {
+      color: #92400e;
+      background: #fef3c7;
+      border: 2px solid #fcd34d;
+    }
+    .warning {
+      color: #92400e;
+      background: #fef3c7;
+      border: 2px solid #fcd34d;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Sentiment Analyzer</h1>
+    <textarea id="inputText" rows="6" placeholder="Type or paste your text here..."></textarea>
+    <button id="analyzeButton" onclick="analyzeText()">Analyze Sentiment</button>
+    <div id="result" class="result"></div>
+  </div>
+</body>
+</html>
